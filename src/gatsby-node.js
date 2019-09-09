@@ -10,7 +10,7 @@ const parseWPImagePath = require(`./utils/parseWPImagePath`)
 
 exports.sourceNodes = async (
   { getNodes, cache, reporter, store, actions, createNodeId },
-  pluginOptions
+  pluginOptions,
 ) => {
   const { createNode } = actions
 
@@ -18,8 +18,8 @@ exports.sourceNodes = async (
     maxWidth: 650,
     wrapperStyle: ``,
     backgroundColor: `white`,
-    postTypes: ["post", "page"],
-    withWebp: false
+    postTypes: ['post', 'page'],
+    withWebp: false,
     // linkImagesToOriginal: true,
     // showCaptions: false,
     // pathPrefix,
@@ -34,8 +34,8 @@ exports.sourceNodes = async (
   // this will be dynamic later
   const entities = nodes.filter(
     node =>
-      node.internal.owner === "gatsby-source-wordpress" &&
-      options.postTypes.includes(node.type)
+      node.internal.owner === 'gatsby-source-wordpress' &&
+      options.postTypes.includes(node.type),
   )
 
   // we need to await transforming all the entities since we may need to get images remotely and generating fluid image data is async
@@ -50,19 +50,19 @@ exports.sourceNodes = async (
           createNode,
           createNodeId,
         },
-        options
-      )
-    )
+        options,
+      ),
+    ),
   )
 }
 
 const transformInlineImagestoStaticImages = async (
   { entity, cache, reporter, store, createNode, createNodeId },
-  options
+  options,
 ) => {
   const field = entity.content
 
-  if ((!field && typeof field !== "string") || !field.includes("<img")) return
+  if ((!field && typeof field !== 'string') || !field.includes('<img')) return
 
   const $ = cheerio.load(field)
 
@@ -72,7 +72,7 @@ const transformInlineImagestoStaticImages = async (
 
   let imageRefs = []
 
-  imgs.each(function() {
+  imgs.each(function () {
     imageRefs.push($(this))
   })
 
@@ -87,8 +87,8 @@ const transformInlineImagestoStaticImages = async (
         store,
         createNode,
         createNodeId,
-      })
-    )
+      }),
+    ),
   )
 
   entity.content = $.html()
@@ -105,7 +105,7 @@ const replaceImage = async ({
   $,
 }) => {
   // find the full size image that matches, throw away WP resizes
-  const parsedUrlData = parseWPImagePath(thisImg.attr("src"))
+  const parsedUrlData = parseWPImagePath(thisImg.attr('src'))
   const url = parsedUrlData.cleanUrl
 
   const imageNode = await downloadMediaFile({
@@ -118,10 +118,10 @@ const replaceImage = async ({
 
   if (!imageNode) return
 
-  let classes = thisImg.attr("class")
+  let classes = thisImg.attr('class')
   let formattedImgTag = {}
   formattedImgTag.url = thisImg.attr(`src`)
-  formattedImgTag.classList = classes ? classes.split(" ") : []
+  formattedImgTag.classList = classes ? classes.split(' ') : []
   formattedImgTag.title = thisImg.attr(`title`)
   formattedImgTag.alt = thisImg.attr(`alt`)
 
@@ -151,7 +151,7 @@ const replaceImage = async ({
 
 // Takes a node and generates the needed images and then returns
 // the needed HTML replacement for the image
-const generateImagesAndUpdateNode = async function({
+const generateImagesAndUpdateNode = async function ({
   formattedImgTag,
   imageNode,
   options,
@@ -178,7 +178,7 @@ const generateImagesAndUpdateNode = async function({
       args: {
         ...options,
         maxWidth: formattedImgTag.width || options.maxWidth,
-        toFormat: 'WEBP'
+        toFormat: 'WEBP',
       },
       reporter,
       cache,
@@ -194,14 +194,14 @@ const generateImagesAndUpdateNode = async function({
   const imgOptions = {
     fluid: fluidResult,
     style: {
-      maxWidth: "100%"
+      maxWidth: '100%',
     },
     // Force show full image instantly
-    critical: true,
-    // fadeIn: true,
+    fadeIn: true,
     imgStyle: {
-      opacity: 1
-    }
+      opacity: 1,
+    },
+    className: formattedImgTag.classList.join(' '),
   }
   if (formattedImgTag.width) imgOptions.style.width = formattedImgTag.width
 
