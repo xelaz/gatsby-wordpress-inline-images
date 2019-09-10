@@ -184,7 +184,8 @@ const generateImagesAndUpdateNode = async function ({
     // fadeIn: true,
     imgStyle: {
       opacity: 1
-    }
+    },
+    className: formattedImgTag.classList.join(' ')
   };
   if (formattedImgTag.width) imgOptions.style.width = formattedImgTag.width;
   const ReactImgEl = React.createElement(Img.default, imgOptions, null);
